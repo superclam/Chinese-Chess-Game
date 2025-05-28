@@ -1,0 +1,458 @@
+* {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* 主菜单样式 */
+.main-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: url('IMAGE/背景.jpg') center center/cover no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.menu-btn {
+    padding: 25px 60px;
+    font-size: 32px;
+    font-weight: bold;
+    background: linear-gradient(145deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+    font-family: "Microsoft YaHei", "SimHei", sans-serif;
+}
+
+.menu-btn:hover {
+    background: linear-gradient(145deg, #45a049, #4CAF50);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.menu-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.menu-btn:nth-child(2) {
+    background: linear-gradient(145deg, #FF9800, #F57C00);
+}
+
+.menu-btn:nth-child(2):hover {
+    background: linear-gradient(145deg, #F57C00, #FF9800);
+}
+
+.menu-btn:nth-child(3) {
+    background: linear-gradient(145deg, #2196F3, #1976D2);
+}
+
+.menu-btn:nth-child(3):hover {
+    background: linear-gradient(145deg, #1976D2, #2196F3);
+}
+
+.game-container {
+    text-align: center;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.setup-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.piece-storage {
+    width: 150px;
+    padding: 20px;
+    border: 2px solid #8B4513;
+    border-radius: 10px;
+    background-color: #F5DEB3;
+}
+
+.piece-storage h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #8B4513;
+}
+
+.storage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    min-height: 400px;
+}
+
+.storage-slot {
+    width: 60px;
+    height: 60px;
+    border: 1px dashed #8B4513;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.storage-slot.drag-over {
+    background-color: rgba(0, 255, 0, 0.3);
+    border-color: #00ff00;
+}
+
+.storage-slot.selected {
+    background-color: rgba(0, 0, 255, 0.3);
+    border-color: #0000ff;
+    border-width: 3px;
+}
+
+.position.available-placement {
+    background-color: rgba(0, 255, 0, 0.5) !important;
+    border: 2px solid #00ff00 !important;
+}
+
+.position.available-placement:hover {
+    background-color: rgba(0, 255, 0, 0.7) !important;
+}
+
+.piece-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff0000;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 15;
+}
+
+.draggable-piece {
+    width: 50px !important;
+    height: 50px !important;
+    cursor: grab;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.2s;
+}
+
+.draggable-piece:hover {
+    transform: scale(1.1);
+}
+
+.draggable-piece.dragging {
+    cursor: grabbing;
+    transform: scale(1.2);
+    z-index: 1000;
+    opacity: 0.8;
+}
+
+.start-game-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.start-game-btn:hover {
+    background-color: #45a049;
+}
+
+.start-game-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.position.drag-over-valid {
+    background-color: rgba(0, 255, 0, 0.3) !important;
+    width: 80px !important;
+    height: 80px !important;
+}
+
+.position.drag-over-invalid {
+    background-color: rgba(255, 0, 0, 0.3) !important;
+    width: 80px !important;
+    height: 80px !important;
+}
+
+.victory-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff0000;
+    background-color: #ffff99;
+    padding: 20px 30px;
+    border: 4px solid #ff0000;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    text-align: center;
+    min-width: 300px;
+    display: none;
+}
+
+.connection-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.connection-status.connecting {
+    background-color: #FF9800;
+    color: white;
+    border: 2px solid #F57C00;
+}
+
+.connection-status.connected {
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid #45a049;
+}
+
+.connection-status.disconnected {
+    background-color: #f44336;
+    color: white;
+    border: 2px solid #d32f2f;
+}
+
+.chessboard {
+    position: relative;
+    width: 800px;
+    height: 900px;
+    margin: 20px auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.chessboard img {
+    width: 100%;
+    height: 100%;
+}
+
+.grid {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(9, 68px);  /* 每列宽度改为60px */
+    grid-template-rows: repeat(5, 90px)  repeat(3, 86px) repeat(2, 90px);    /* 前5行+河道间距+后4行，河道只影响第5行向上的距离 */
+    justify-content: space-evenly;  /* 均匀分布剩余空间 */
+}
+
+.position {
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.chess-piece {
+    width: 80px !important;
+    height: 80px !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: auto;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* 四个角的三角框架 - 蓝色（选中棋子） - 围绕棋子图片 */
+.position.selected .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 更大 */
+.position.selected .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid blue;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 更大 */
+.position.selected .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid blue;
+    border-bottom: 20px solid transparent;
+}
+
+.position.selected .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 更大 */
+.position.selected .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid blue;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 更大 */
+.position.selected .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid blue;
+    border-top: 20px solid transparent;
+}
+
+/* 四个角的三角框架 - 红色（空位点击） - 围绕空位 */
+.position.empty-target .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 红色 */
+.position.empty-target .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 红色 */
+.position.empty-target .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+.position.empty-target .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 红色 */
+.position.empty-target .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 红色 */
+.position.empty-target .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-top: 20px solid transparent;
+}

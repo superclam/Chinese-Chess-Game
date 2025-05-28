@@ -1,0 +1,16 @@
+{
+  "name": "chess-lan-game",
+  "version": "1.0.0",
+  "description": "Chinese Chess LAN Multiplayer Game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "keywords": ["chess", "multiplayer", "websocket"],
+  "author": "",
+  "license": "MIT"
+}

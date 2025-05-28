@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国象棋棋盘定位</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <!-- 主菜单 -->
+    <div class="main-menu" id="mainMenu">
+        <div class="menu-buttons">
+            <button class="menu-btn" id="singlePlayerBtn">单人游戏</button>
+            <button class="menu-btn" id="lanGameBtn">局域网联机</button>
+            <button class="menu-btn" id="onlineGameBtn">远程联机</button>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <div class="victory-message" id="victoryMessage"></div>
+
+        <!-- 连接状态显示 -->
+        <div class="connection-status" id="connectionStatus" style="display: none;">
+            <span id="statusText">正在连接...</span>
+        </div>
+
+        <!-- 初始化阶段的布局 -->
+        <div class="setup-container" id="setupContainer">
+            <!-- 红方区域 -->
+            <div style="display: flex; align-items: center;">
+                <!-- 红方身份显示 -->
+                <div id="redPlayerIdentity" style="
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #d32f2f;
+                    margin-right: 20px;
+                    display: none;
+                "></div>
+
+                <!-- 红方棋子存储区 -->
+                <div class="piece-storage">
+                <h3>红方棋子</h3>
+                <div class="storage-grid" id="redStorage"></div>
+                <button class="start-game-btn" id="redAutoInitBtn" style="background-color: #9C27B0; margin-top: 10px; width: 100%; font-size: 14px;">随机初始化</button>
+                <button class="start-game-btn" id="redResetBtn" style="background-color: #f44336; margin-top: 10px; width: 100%; font-size: 14px;">重新初始化</button>
+                <button class="start-game-btn" id="redCompleteBtn" style="margin-top: 10px; width: 100%; font-size: 14px;">完成初始化</button>
+                <div id="redStatus" style="margin-top: 10px; text-align: center; font-weight: bold; color: #666; display: none;">红方已完成初始化</div>
+                </div>
+            </div>
+
+            <!-- 棋盘 -->
+            <div class="chessboard">
+                <img src="IMAGE/棋盘.jpg" alt="象棋棋盘">
+                <div class="grid" id="grid"></div>
+            </div>
+
+            <!-- 黑方区域 -->
+            <div style="display: flex; align-items: center;">
+                <!-- 黑方棋子存储区 -->
+                <div class="piece-storage">
+                    <h3>黑方棋子</h3>
+                    <div class="storage-grid" id="blackStorage"></div>
+                    <button class="start-game-btn" id="blackAutoInitBtn" style="background-color: #9C27B0; margin-top: 10px; width: 100%; font-size: 14px;">随机初始化</button>
+                    <button class="start-game-btn" id="blackResetBtn" style="background-color: #f44336; margin-top: 10px; width: 100%; font-size: 14px;">重新初始化</button>
+                    <button class="start-game-btn" id="blackCompleteBtn" style="margin-top: 10px; width: 100%; font-size: 14px;">完成初始化</button>
+                    <div id="blackStatus" style="margin-top: 10px; text-align: center; font-weight: bold; color: #666; display: none;">黑方已完成初始化</div>
+                </div>
+
+                <!-- 黑方身份显示 -->
+                <div id="blackPlayerIdentity" style="
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #424242;
+                    margin-left: 20px;
+                    display: none;
+                "></div>
+            </div>
+        </div>
+
+        <!-- 游戏阶段的布局 -->
+        <div class="chessboard" id="gameBoard" style="display: none;">
+            <img src="IMAGE/棋盘.jpg" alt="象棋棋盘">
+            <div class="grid" id="gameGrid"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
