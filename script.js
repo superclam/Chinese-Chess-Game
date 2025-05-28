@@ -396,8 +396,12 @@ function initializePieceStorage() {
     redStorage.innerHTML = '';
     blackStorage.innerHTML = '';
 
+    // 随机打乱棋子顺序，避免位置固定
+    const shuffledRedPieces = shuffleArray(allPieces.red);
+    const shuffledBlackPieces = shuffleArray(allPieces.black);
+
     // 创建红方棋子
-    allPieces.red.forEach((pieceData, index) => {
+    shuffledRedPieces.forEach((pieceData, index) => {
         const slot = document.createElement('div');
         slot.className = 'storage-slot';
 
@@ -434,7 +438,7 @@ function initializePieceStorage() {
     });
 
     // 创建黑方棋子
-    allPieces.black.forEach((pieceData, index) => {
+    shuffledBlackPieces.forEach((pieceData, index) => {
         const slot = document.createElement('div');
         slot.className = 'storage-slot';
 
@@ -549,6 +553,11 @@ function addStorageSlotDragEvents(slot, pieceName, color) {
 
                 // 重新渲染棋盘
                 renderBoard();
+
+                // 如果是联机模式，发送游戏状态更新
+                if (isOnlineMode) {
+                    sendGameStateUpdate();
+                }
             }
         }
     });
@@ -1392,6 +1401,11 @@ function renderBoard() {
                                         }
                                         break;
                                     }
+                                }
+
+                                // 如果是联机模式，发送游戏状态更新
+                                if (isOnlineMode) {
+                                    sendGameStateUpdate();
                                 }
                             });
 
