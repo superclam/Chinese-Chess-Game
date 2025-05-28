@@ -1338,72 +1338,85 @@ function renderBoard() {
                         const pieceName = boardState[pieceKey];
                         const pieceColor = pieceName.startsWith('红') ? 'red' : 'black';
 
-                        // 启用拖拽和指针事件
-                        piece.draggable = true;
-                        piece.style.pointerEvents = 'auto';
-                        piece.style.webkitUserDrag = 'element';
-                        piece.style.cursor = 'grab';
+                        // 在联机模式下，检查是否有权限操作这个棋子
+                        const canManipulatePiece = !isOnlineMode || !playerSide || pieceColor === playerSide;
 
-                        // 添加双击移除功能
-                        piece.addEventListener('dblclick', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            // 移除棋子并放回存储区
-                            delete boardState[`${col},${row}`];
-                            position.removeChild(piece);
-
-                            // 找到对应的存储区棋子并增加数量
-                            const storage = pieceColor === 'red' ? redStorage : blackStorage;
-                            const slots = storage.querySelectorAll('.storage-slot');
-
-                            for (let slot of slots) {
-                                const slotPiece = slot.querySelector('.draggable-piece');
-                                if (slotPiece && slotPiece.dataset.piece === pieceName) {
-                                    const currentCount = parseInt(slotPiece.dataset.currentCount);
-                                    const newCount = currentCount + 1;
-                                    slotPiece.dataset.currentCount = newCount;
-
-                                    // 显示棋子（如果之前被隐藏）
-                                    slotPiece.style.display = 'block';
-
-                                    // 更新数量显示
-                                    let countLabel = slot.querySelector('.piece-count');
-                                    if (newCount > 1) {
-                                        if (!countLabel) {
-                                            countLabel = document.createElement('div');
-                                            countLabel.className = 'piece-count';
-                                            slot.appendChild(countLabel);
-                                        }
-                                        countLabel.textContent = `×${newCount}`;
-                                        countLabel.style.display = 'flex';
-                                    }
-                                    break;
-                                }
-                            }
-                        });
-
-                        // 添加拖拽功能，让棋子可以拖回存储区或重新放置
-                        piece.addEventListener('dragstart', (e) => {
-                            draggedPiece = piece;
-                            piece.classList.add('dragging');
-                            piece.style.cursor = 'grabbing';
-                            e.dataTransfer.effectAllowed = 'move';
-                            e.dataTransfer.setData('text/html', piece.outerHTML);
-                            // 标记这是从棋盘拖拽的棋子
-                            piece.dataset.fromBoard = 'true';
-                            piece.dataset.boardCol = col;
-                            piece.dataset.boardRow = row;
-                        });
-
-                        piece.addEventListener('dragend', (e) => {
-                            piece.classList.remove('dragging');
+                        if (canManipulatePiece) {
+                            // 启用拖拽和指针事件
+                            piece.draggable = true;
+                            piece.style.pointerEvents = 'auto';
+                            piece.style.webkitUserDrag = 'element';
                             piece.style.cursor = 'grab';
-                            draggedPiece = null;
-                            delete piece.dataset.fromBoard;
-                            delete piece.dataset.boardCol;
-                            delete piece.dataset.boardRow;
-                        });
+                        } else {
+                            // 敌方棋子：禁用拖拽和指针事件
+                            piece.draggable = false;
+                            piece.style.pointerEvents = 'none';
+                            piece.style.webkitUserDrag = 'none';
+                            piece.style.cursor = 'default';
+                        }
+
+                        // 添加双击移除功能（仅限自己的棋子）
+                        if (canManipulatePiece) {
+                            piece.addEventListener('dblclick', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+
+                                // 移除棋子并放回存储区
+                                delete boardState[`${col},${row}`];
+                                position.removeChild(piece);
+
+                                // 找到对应的存储区棋子并增加数量
+                                const storage = pieceColor === 'red' ? redStorage : blackStorage;
+                                const slots = storage.querySelectorAll('.storage-slot');
+
+                                for (let slot of slots) {
+                                    const slotPiece = slot.querySelector('.draggable-piece');
+                                    if (slotPiece && slotPiece.dataset.piece === pieceName) {
+                                        const currentCount = parseInt(slotPiece.dataset.currentCount);
+                                        const newCount = currentCount + 1;
+                                        slotPiece.dataset.currentCount = newCount;
+
+                                        // 显示棋子（如果之前被隐藏）
+                                        slotPiece.style.display = 'block';
+
+                                        // 更新数量显示
+                                        let countLabel = slot.querySelector('.piece-count');
+                                        if (newCount > 1) {
+                                            if (!countLabel) {
+                                                countLabel = document.createElement('div');
+                                                countLabel.className = 'piece-count';
+                                                slot.appendChild(countLabel);
+                                            }
+                                            countLabel.textContent = `×${newCount}`;
+                                            countLabel.style.display = 'flex';
+                                        }
+                                        break;
+                                    }
+                                }
+                            });
+
+                            // 添加拖拽功能，让棋子可以拖回存储区或重新放置（仅限自己的棋子）
+                            piece.addEventListener('dragstart', (e) => {
+                                draggedPiece = piece;
+                                piece.classList.add('dragging');
+                                piece.style.cursor = 'grabbing';
+                                e.dataTransfer.effectAllowed = 'move';
+                                e.dataTransfer.setData('text/html', piece.outerHTML);
+                                // 标记这是从棋盘拖拽的棋子
+                                piece.dataset.fromBoard = 'true';
+                                piece.dataset.boardCol = col;
+                                piece.dataset.boardRow = row;
+                            });
+
+                            piece.addEventListener('dragend', (e) => {
+                                piece.classList.remove('dragging');
+                                piece.style.cursor = 'grab';
+                                draggedPiece = null;
+                                delete piece.dataset.fromBoard;
+                                delete piece.dataset.boardCol;
+                                delete piece.dataset.boardRow;
+                            });
+                        }
                     }
 
                     position.appendChild(piece);
@@ -1600,6 +1613,16 @@ function createBoard(gridElement, isSetupMode = false) {
                         const pieceName = draggedPiece.dataset.piece;
                         const isFromBoard = draggedPiece.dataset.fromBoard === 'true';
 
+                        // 在联机模式下，检查是否有权限拖拽这个棋子
+                        const canDragPiece = !isOnlineMode || !playerSide || pieceColor === playerSide;
+
+                        if (!canDragPiece) {
+                            e.dataTransfer.dropEffect = 'none';
+                            position.classList.add('drag-over-invalid');
+                            position.classList.remove('drag-over-valid');
+                            return;
+                        }
+
                         // 如果是从棋盘拖拽的棋子，需要检查目标位置是否为空或者是原位置
                         const isOriginalPosition = isFromBoard &&
                             parseInt(draggedPiece.dataset.boardCol) === col &&
@@ -1631,6 +1654,13 @@ function createBoard(gridElement, isSetupMode = false) {
                         const pieceColor = draggedPiece.dataset.color;
                         const pieceName = draggedPiece.dataset.piece;
                         const isFromBoard = draggedPiece.dataset.fromBoard === 'true';
+
+                        // 在联机模式下，检查是否有权限拖拽这个棋子
+                        const canDragPiece = !isOnlineMode || !playerSide || pieceColor === playerSide;
+
+                        if (!canDragPiece) {
+                            return; // 没有权限，直接返回
+                        }
 
                         // 如果是从棋盘拖拽的棋子，需要检查目标位置是否为空或者是原位置
                         const isOriginalPosition = isFromBoard &&
