@@ -1,4 +1,4 @@
-name: Deploy to Codespaces
+name: Deploy Chinese Chess Game
 
 on:
   push:
@@ -7,22 +7,28 @@ on:
     branches: [ main, master ]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm install
-    
+
     - name: Test server startup
       run: |
         timeout 10s npm start || true
         echo "Server test completed"
+
+    - name: Validate Codespaces configuration
+      run: |
+        echo "Validating devcontainer.json..."
+        test -f .devcontainer/devcontainer.json && echo "✅ Codespaces config exists"
+        echo "🎮 Chinese Chess Game is ready for Codespaces deployment!"

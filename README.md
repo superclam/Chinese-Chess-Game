@@ -33,7 +33,7 @@ node server.js
 
 ## 远程联机部署指南
 
-### 使用GitHub Codespaces部署
+### 使用GitHub Codespaces部署（推荐）
 
 1. **Fork这个仓库到你的GitHub账户**
 
@@ -43,8 +43,9 @@ node server.js
    - 点击"Create codespace on main"
 
 3. **自动部署**：
-   - Codespace创建后会自动安装依赖并启动服务器
-   - 查看终端输出获取WebSocket连接地址
+   - Codespace创建后会自动安装依赖
+   - 在终端中运行 `./start-codespaces.sh` 或 `node server.js` 启动服务器
+   - 查看终端输出获取连接地址
 
 4. **获取服务器地址**：
    - 服务器启动后，终端会显示类似这样的地址：
@@ -52,10 +53,15 @@ node server.js
    GitHub Codespaces访问: https://your-codespace-name-3000.preview.app.github.dev
    WebSocket地址: wss://your-codespace-name-3000.preview.app.github.dev
    ```
+   - 或者在Codespaces的"端口"面板中查看端口3000的转发地址
 
 5. **分享给朋友**：
    - 将WebSocket地址分享给想要联机的朋友
    - 朋友在游戏中选择"远程联机"并输入这个地址
+
+6. **快速启动**：
+   - 在Codespaces终端中运行：`chmod +x start-codespaces.sh && ./start-codespaces.sh`
+   - 或者直接运行：`node server.js`
 
 ### 手动部署到其他平台
 
