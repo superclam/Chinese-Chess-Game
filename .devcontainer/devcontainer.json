@@ -22,15 +22,19 @@
   "portsAttributes": {
     "3000": {
       "label": "Chess Game Server",
-      "onAutoForward": "openBrowser"
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+      
     },
     "8080": {
       "label": "Development Server",
-      "onAutoForward": "notify"
+      "onAutoForward": "notify",
+      "visibility": "public"
     },
     "5500": {
       "label": "Live Server",
-      "onAutoForward": "notify"
+      "onAutoForward": "notify",
+      "visibility": "public"
     }
   },
   "postCreateCommand": "npm install",
