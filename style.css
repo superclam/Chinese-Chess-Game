@@ -92,6 +92,7 @@
     border: 2px solid #8B4513;
     border-radius: 10px;
     background-color: #F5DEB3;
+    margin-top: 50px; /* 向下移动50像素，使储存区与棋盘更好地平行对齐 */
 }
 
 .piece-storage h3 {
@@ -456,3 +457,5 @@
     border-right: 20px solid red;
     border-top: 20px solid transparent;
 }
+
+

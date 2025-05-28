@@ -832,138 +832,17 @@ function canPieceBePlacedAt(pieceName, col, row, color) {
     return isInInitializationZone(col, row, color);
 }
 
-// 检查兵是否可以快速移动
-function canPawnFastMove(fromCol, fromRow, toCol, toRow) {
-    // 快速移动的有效列：0, 8
-    const validCols = [0, 8];
-    // 快速移动的有效行：0, 4, 5, 9
-    const validRows = [0, 4, 5, 9];
 
-    // 检查起点是否在快速移动网络中
-    const fromOnValidRow = validRows.includes(fromRow);
-    const fromOnValidCol = validCols.includes(fromCol);
 
-    // 起点必须在有效位置（有效行或有效列）
-    if (!fromOnValidRow && !fromOnValidCol) {
-        return false;
-    }
 
-    // 如果起点和终点相同，不是快速移动
-    if (fromCol === toCol && fromRow === toRow) {
-        return false;
-    }
 
-    // 使用BFS寻找路径，只要能找到路径就可以到达
-    return findPawnFastPath(fromCol, fromRow, toCol, toRow);
-}
 
-// 使用BFS寻找兵的快速移动路径
-function findPawnFastPath(fromCol, fromRow, toCol, toRow) {
-    const validCols = [0, 8];
-    const validRows = [0, 4, 5, 9];
 
-    // 简化版本：直接检查几种常见的多拐弯路径
-    const possiblePaths = [
-        // 2次拐弯的路径模式
-        [[fromCol, fromRow], [fromCol, 0], [toCol, 0], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 4], [toCol, 4], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 5], [toCol, 5], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 9], [toCol, 9], [toCol, toRow]],
-        [[fromCol, fromRow], [0, fromRow], [0, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [8, fromRow], [8, toRow], [toCol, toRow]],
 
-        // 3次拐弯的路径模式
-        [[fromCol, fromRow], [fromCol, 0], [0, 0], [0, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 0], [8, 0], [8, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 4], [0, 4], [0, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 4], [8, 4], [8, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 5], [0, 5], [0, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 5], [8, 5], [8, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 9], [0, 9], [0, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [fromCol, 9], [8, 9], [8, toRow], [toCol, toRow]],
-        [[fromCol, fromRow], [0, fromRow], [0, 0], [toCol, 0], [toCol, toRow]],
-        [[fromCol, fromRow], [0, fromRow], [0, 4], [toCol, 4], [toCol, toRow]],
-        [[fromCol, fromRow], [0, fromRow], [0, 5], [toCol, 5], [toCol, toRow]],
-        [[fromCol, fromRow], [0, fromRow], [0, 9], [toCol, 9], [toCol, toRow]],
-        [[fromCol, fromRow], [8, fromRow], [8, 0], [toCol, 0], [toCol, toRow]],
-        [[fromCol, fromRow], [8, fromRow], [8, 4], [toCol, 4], [toCol, toRow]],
-        [[fromCol, fromRow], [8, fromRow], [8, 5], [toCol, 5], [toCol, toRow]],
-        [[fromCol, fromRow], [8, fromRow], [8, 9], [toCol, 9], [toCol, toRow]]
-    ];
 
-    // 检查每个可能的路径
-    for (let path of possiblePaths) {
-        if (isValidPath(path, validCols, validRows) && isPathClear(path)) {
-            return true; // 找到有效且畅通的路径
-        }
-    }
 
-    return false; // 没有找到有效路径
-}
 
-// 检查路径是否有效
-function isValidPath(path, validCols, validRows) {
-    for (let i = 0; i < path.length - 1; i++) {
-        const [fromCol, fromRow] = path[i];
-        const [toCol, toRow] = path[i + 1];
 
-        // 检查这一步移动是否有效
-        if (fromCol === toCol) {
-            // 同列移动，起点必须在有效列上
-            if (!validCols.includes(fromCol)) {
-                return false;
-            }
-        } else if (fromRow === toRow) {
-            // 同行移动，起点必须在有效行上
-            if (!validRows.includes(fromRow)) {
-                return false;
-            }
-        } else {
-            // 不是同行也不是同列，无效移动
-            return false;
-        }
-    }
-    return true;
-}
-
-// 检查路径是否畅通（没有棋子阻挡，终点除外）
-function isPathClear(path) {
-    // 检查路径上每一段移动的所有点是否有棋子阻挡
-    for (let i = 0; i < path.length - 1; i++) {
-        const [fromCol, fromRow] = path[i];
-        const [toCol, toRow] = path[i + 1];
-
-        // 检查这一段路径上的所有中间点
-        if (fromCol === toCol) {
-            // 同列移动，检查中间的行
-            const startRow = Math.min(fromRow, toRow);
-            const endRow = Math.max(fromRow, toRow);
-            for (let r = startRow + 1; r < endRow; r++) {
-                if (boardState[`${fromCol},${r}`]) {
-                    return false; // 路径被阻挡
-                }
-            }
-        } else if (fromRow === toRow) {
-            // 同行移动，检查中间的列
-            const startCol = Math.min(fromCol, toCol);
-            const endCol = Math.max(fromCol, toCol);
-            for (let c = startCol + 1; c < endCol; c++) {
-                if (boardState[`${c},${fromRow}`]) {
-                    return false; // 路径被阻挡
-                }
-            }
-        }
-
-        // 检查中转点是否被阻挡（除了起点和最终终点）
-        if (i > 0 && i < path.length - 2) {
-            // 只检查中间的中转点，不检查最后一个点（终点）
-            if (boardState[`${toCol},${toRow}`]) {
-                return false; // 中转点被阻挡
-            }
-        }
-    }
-    return true; // 路径畅通
-}
 
 // 检查位置是否在保护区内（象的快速传送目标点位）
 function isInProtectedZone(col, row) {
@@ -998,6 +877,111 @@ function isInProtectedZone(col, row) {
     return false;
 }
 
+
+
+// 检查位置是否在铁路线上
+function isOnRailway(col, row) {
+    // 铁路线：0、4、5、9行和0、8列
+    return (row === 0 || row === 4 || row === 5 || row === 9) || (col === 0 || col === 8);
+}
+
+// 检查铁路线路径是否被阻挡（使用广度优先搜索）
+function isRailwayPathClear(fromCol, fromRow, toCol, toRow) {
+    // 如果起点和终点都在铁路线上，检查路径
+    if (!isOnRailway(fromCol, fromRow) || !isOnRailway(toCol, toRow)) {
+        return false;
+    }
+
+    // 如果起点和终点相同
+    if (fromCol === toCol && fromRow === toRow) {
+        return true;
+    }
+
+    // 使用广度优先搜索找到路径
+    const queue = [{col: fromCol, row: fromRow, path: [`${fromCol},${fromRow}`]}];
+    const visited = new Set([`${fromCol},${fromRow}`]);
+
+    while (queue.length > 0) {
+        const {col, row, path} = queue.shift();
+
+        // 检查四个方向的移动
+        const directions = [
+            {dc: 0, dr: 1},  // 下
+            {dc: 0, dr: -1}, // 上
+            {dc: 1, dr: 0},  // 右
+            {dc: -1, dr: 0}  // 左
+        ];
+
+        for (const {dc, dr} of directions) {
+            // 尝试在这个方向上移动多步
+            for (let step = 1; step <= 9; step++) {
+                const newCol = col + dc * step;
+                const newRow = row + dr * step;
+
+                // 检查是否超出棋盘范围
+                if (newCol < 0 || newCol > 8 || newRow < 0 || newRow > 9) {
+                    break;
+                }
+
+                // 检查新位置是否在铁路线上
+                if (!isOnRailway(newCol, newRow)) {
+                    break;
+                }
+
+                const newPosKey = `${newCol},${newRow}`;
+
+                // 如果到达目标位置，直接返回true（允许吃子）
+                if (newCol === toCol && newRow === toRow) {
+                    return true; // 找到目标位置，无论是否有棋子（吃子）
+                }
+
+                // 检查路径上是否有棋子阻挡（不包括目标位置）
+                if (boardState[`${newCol},${newRow}`]) {
+                    break; // 被阻挡，不能继续在这个方向移动
+                }
+
+                // 如果这个位置还没有访问过，加入队列
+                if (!visited.has(newPosKey)) {
+                    visited.add(newPosKey);
+                    queue.push({
+                        col: newCol,
+                        row: newRow,
+                        path: [...path, newPosKey]
+                    });
+                }
+            }
+        }
+    }
+
+    return false; // 没有找到有效路径
+}
+
+// 兵的移动规则验证
+function isValidPawnMove(fromCol, fromRow, toCol, toRow) {
+    const colDiff = Math.abs(toCol - fromCol);
+    const rowDiff = Math.abs(toRow - fromRow);
+
+    // 不能原地不动
+    if (colDiff === 0 && rowDiff === 0) {
+        return false;
+    }
+
+    // 一、铁路线移动（快速路径）
+    if (isOnRailway(fromCol, fromRow) && isOnRailway(toCol, toRow)) {
+        // 在铁路线上可以任意方向移动，包括直走和直角拐弯
+        return isRailwayPathClear(fromCol, fromRow, toCol, toRow);
+    }
+
+    // 二、公路线移动（常规路径）
+    // 每次只能移动1格，方向仅限上下左右直走
+    if ((colDiff === 1 && rowDiff === 0) || (colDiff === 0 && rowDiff === 1)) {
+        return true;
+    }
+
+    // 其他移动方式无效
+    return false;
+}
+
 // 检查棋子移动是否有效
 function isValidMove(fromCol, fromRow, toCol, toRow, piece) {
     // 检查是否在棋盘范围内
@@ -1014,58 +998,18 @@ function isValidMove(fromCol, fromRow, toCol, toRow, piece) {
             return false; // 不能吃己方棋子
         }
 
-        // 检查保护区规则：只有象能吃保护区内的敌方棋子
-        if (isInProtectedZone(toCol, toRow) && !piece.includes('象')) {
-            return false; // 非象棋子不能吃保护区内的棋子
+        // 检查保护区规则：只有象和兵能吃保护区内的敌方棋子
+        if (isInProtectedZone(toCol, toRow) && !piece.includes('象') && !piece.includes('兵')) {
+            return false; // 非象、非兵棋子不能吃保护区内的棋子
         }
     }
 
     const colDiff = Math.abs(toCol - fromCol);
     const rowDiff = Math.abs(toRow - fromRow);
 
-    // 兵的移动规则：一次走一格 + 快速移动
+    // 兵的移动规则：铁路线移动（快速路径）+ 公路线移动（常规路径）
     if (piece.includes('兵')) {
-        const validCols = [0, 8];
-        const validRows = [0, 4, 5, 9];
-        const fromOnValidRow = validRows.includes(fromRow);
-        const fromOnValidCol = validCols.includes(fromCol);
-
-        // 普通移动：一次走一格（上下左右）
-        if ((colDiff === 1 && rowDiff === 0) || (colDiff === 0 && rowDiff === 1)) {
-            return true; // 一格移动总是允许的
-        }
-
-        // 检查是否是在快速移动网络上的直线移动
-        if (fromOnValidRow || fromOnValidCol) {
-            // 同列移动（在有效列上）
-            if (fromCol === toCol && validCols.includes(fromCol)) {
-                // 检查路径上是否有阻挡
-                const startRow = Math.min(fromRow, toRow);
-                const endRow = Math.max(fromRow, toRow);
-                for (let r = startRow + 1; r < endRow; r++) {
-                    if (boardState[`${fromCol},${r}`]) {
-                        return false; // 路径被阻挡
-                    }
-                }
-                return true;
-            }
-
-            // 同行移动（在有效行上）
-            if (fromRow === toRow && validRows.includes(fromRow)) {
-                // 检查路径上是否有阻挡
-                const startCol = Math.min(fromCol, toCol);
-                const endCol = Math.max(fromCol, toCol);
-                for (let c = startCol + 1; c < endCol; c++) {
-                    if (boardState[`${c},${fromRow}`]) {
-                        return false; // 路径被阻挡
-                    }
-                }
-                return true;
-            }
-        }
-
-        // 复杂的快速移动：需要拐弯的移动
-        return canPawnFastMove(fromCol, fromRow, toCol, toRow);
+        return isValidPawnMove(fromCol, fromRow, toCol, toRow);
     }
 
     // 炮的移动规则：一次走一格（上下左右）
@@ -1212,10 +1156,111 @@ function addCornerFrames(position, type = 'selected') {
     position.classList.add(type);
 }
 
+// 重新游戏函数
+function restartGame() {
+    // 隐藏胜利消息
+    const victoryElement = document.getElementById('victoryMessage');
+    victoryElement.style.display = 'none';
+    victoryElement.innerHTML = '';
+
+    // 重置游戏状态
+    gameMode = 'setup';
+    selectedPosition = null;
+    emptyTargetPosition = null;
+    draggedPiece = null;
+    selectedStoragePiece = null;
+    redCompleted = false;
+    blackCompleted = false;
+
+    // 重置回合状态
+    currentTurn = 'red';
+    turnNumber = 1;
+
+    // 清空棋盘状态
+    boardState = {};
+
+    // 显示初始化界面，隐藏游戏界面
+    setupContainer.style.display = 'flex'; // 确保使用正确的display值
+    gameBoard.style.display = 'none';
+
+    // 清除回合显示信息
+    const turnInfo = document.getElementById('turnInfo');
+    if (turnInfo) {
+        turnInfo.remove();
+    }
+
+    // 清除所有高亮和选择状态
+    clearHighlights();
+    clearStorageSelection();
+    clearAvailablePlacements();
+
+    // 重新初始化棋子存储区
+    initializePieceStorage();
+
+    // 重新创建初始化棋盘
+    createBoard(grid, true);
+
+    // 更新状态显示
+    updateRedStatus();
+    updateBlackStatus();
+    updateSetupPlayerIdentity();
+    updatePlayerIdentityDisplay(); // 确保玩家身份显示正确
+
+    // 如果是联机模式，发送游戏重置信息
+    if (isOnlineMode) {
+        sendGameStateUpdate();
+    }
+
+    console.log('游戏已重新开始');
+}
+
 // 显示胜利信息
 function showVictoryMessage(message) {
     const victoryElement = document.getElementById('victoryMessage');
-    victoryElement.textContent = message;
+
+    // 清空之前的内容
+    victoryElement.innerHTML = '';
+
+    // 创建胜利消息文本
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    messageText.style.marginBottom = '20px';
+    messageText.style.fontSize = '24px';
+    messageText.style.fontWeight = 'bold';
+
+    // 创建重新游戏按钮
+    const restartButton = document.createElement('button');
+    restartButton.textContent = '重新游戏';
+    restartButton.className = 'restart-btn';
+    restartButton.style.cssText = `
+        padding: 12px 24px;
+        font-size: 18px;
+        font-weight: bold;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    `;
+
+    // 添加按钮悬停效果
+    restartButton.addEventListener('mouseenter', () => {
+        restartButton.style.backgroundColor = '#45a049';
+    });
+
+    restartButton.addEventListener('mouseleave', () => {
+        restartButton.style.backgroundColor = '#4CAF50';
+    });
+
+    // 添加重新游戏功能
+    restartButton.addEventListener('click', () => {
+        restartGame();
+    });
+
+    // 将元素添加到胜利消息容器
+    victoryElement.appendChild(messageText);
+    victoryElement.appendChild(restartButton);
     victoryElement.style.display = 'block';
 }
 
@@ -1567,6 +1612,8 @@ function createBoard(gridElement, isSetupMode = false) {
             position.className = 'position';
             position.dataset.col = col;
             position.dataset.row = row;
+
+
 
             if (isSetupMode) {
                 // 初始化模式：添加点击放置事件
