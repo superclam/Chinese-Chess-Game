@@ -264,14 +264,61 @@ function getLocalIP() {
 
 server.listen(PORT, '0.0.0.0', () => {
     const localIP = getLocalIP();
-    console.log(`本机访问: http://localhost:${PORT}`);
-    console.log(`局域网访问: http://${localIP}:${PORT}`);
+    console.log('='.repeat(60));
+    console.log('🎮 中国象棋联机服务器已启动');
+    console.log('='.repeat(60));
+    console.log(`📱 本机访问: http://localhost:${PORT}`);
+    console.log(`🌐 局域网访问: http://${localIP}:${PORT}`);
 
     // 如果在GitHub Codespaces环境中
     if (process.env.CODESPACE_NAME) {
-        console.log(`GitHub Codespaces访问: https://${process.env.CODESPACE_NAME}-${PORT}.preview.app.github.dev`);
-        console.log(`WebSocket地址: wss://${process.env.CODESPACE_NAME}-${PORT}.preview.app.github.dev`);
+        console.log(`☁️  GitHub Codespaces访问: https://${process.env.CODESPACE_NAME}-${PORT}.preview.app.github.dev`);
+        console.log(`🔗 WebSocket地址: wss://${process.env.CODESPACE_NAME}-${PORT}.preview.app.github.dev`);
     }
 
-    console.log('服务器已启动，支持局域网和远程联机');
+    console.log('='.repeat(60));
+    console.log('💡 使用说明:');
+    console.log('   • 单人游戏: 直接在浏览器中游戏');
+    console.log('   • 局域网联机: 两个玩家访问同一地址');
+    console.log('   • 远程联机: 使用GitHub Codespaces地址');
+    console.log('='.repeat(60));
+    console.log('⚠️  关闭服务器: 按 Ctrl+C 或在终端中输入 Ctrl+C');
+    console.log('='.repeat(60));
+});
+
+// 优雅关闭服务器
+process.on('SIGINT', () => {
+    console.log('\n' + '='.repeat(60));
+    console.log('🛑 正在关闭服务器...');
+    console.log('='.repeat(60));
+
+    // 关闭WebSocket服务器
+    wss.close(() => {
+        console.log('✅ WebSocket服务器已关闭');
+    });
+
+    // 关闭HTTP服务器
+    server.close(() => {
+        console.log('✅ HTTP服务器已关闭');
+        console.log('👋 服务器已安全关闭，感谢使用！');
+        console.log('='.repeat(60));
+        process.exit(0);
+    });
+});
+
+process.on('SIGTERM', () => {
+    console.log('\n' + '='.repeat(60));
+    console.log('🛑 收到终止信号，正在关闭服务器...');
+    console.log('='.repeat(60));
+
+    wss.close(() => {
+        console.log('✅ WebSocket服务器已关闭');
+    });
+
+    server.close(() => {
+        console.log('✅ HTTP服务器已关闭');
+        console.log('👋 服务器已安全关闭！');
+        console.log('='.repeat(60));
+        process.exit(0);
+    });
 });
