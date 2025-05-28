@@ -1308,8 +1308,8 @@ function renderBoard() {
                     const pieceName = boardState[pieceKey];
                     const pieceColor = pieceName.startsWith('红') ? 'red' : 'black';
 
-                    // 在联机模式下，对面玩家的棋子显示为蒙版
-                    if (isOnlineMode && playerSide && gameMode === 'playing') {
+                    // 在联机模式下，对面玩家的棋子显示为蒙版（包括初始化阶段）
+                    if (isOnlineMode && playerSide) {
                         if (pieceColor !== playerSide) {
                             // 对面玩家的棋子显示蒙版
                             piece.src = 'IMAGE/蒙版.png';
@@ -1324,7 +1324,7 @@ function renderBoard() {
                             piece.dataset.masked = 'false';
                         }
                     } else {
-                        // 单人模式或初始化阶段正常显示所有棋子
+                        // 单人模式或未分配身份时正常显示所有棋子
                         piece.src = `IMAGE/${pieceName}.png`;
                         piece.alt = pieceName;
                         piece.dataset.piece = pieceName;
