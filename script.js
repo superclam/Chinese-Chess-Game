@@ -1346,17 +1346,17 @@ function movePiece(fromCol, fromRow, toCol, toRow) {
 
 // 坐标转换函数：将逻辑坐标转换为显示坐标
 function logicToDisplay(col, row) {
-    // 在联机模式下，让我方始终在下方
+    // 在联机模式下，让我方始终在上方
     if (isOnlineMode && playerSide) {
         if (playerSide === 'red') {
-            // 红方玩家：保持原样（红方本来就在下方row=0,2,3）
-            return { col, row };
-        } else if (playerSide === 'black') {
-            // 黑方玩家：翻转棋盘让黑方在下方
+            // 红方玩家：翻转棋盘让红方在上方（原本红方在下方row=0,2,3）
             return {
                 col: 8 - col,  // 列翻转
                 row: 9 - row   // 行翻转
             };
+        } else if (playerSide === 'black') {
+            // 黑方玩家：保持原样（黑方本来就在上方row=6,7,9）
+            return { col, row };
         }
     }
     // 单人模式或未分配身份时保持原样
@@ -1365,17 +1365,17 @@ function logicToDisplay(col, row) {
 
 // 坐标转换函数：将显示坐标转换为逻辑坐标
 function displayToLogic(col, row) {
-    // 在联机模式下，让我方始终在下方
+    // 在联机模式下，让我方始终在上方
     if (isOnlineMode && playerSide) {
         if (playerSide === 'red') {
-            // 红方玩家：保持原样（红方本来就在下方row=0,2,3）
-            return { col, row };
-        } else if (playerSide === 'black') {
-            // 黑方玩家：翻转棋盘让黑方在下方
+            // 红方玩家：翻转棋盘让红方在上方（原本红方在下方row=0,2,3）
             return {
                 col: 8 - col,  // 列翻转
                 row: 9 - row   // 行翻转
             };
+        } else if (playerSide === 'black') {
+            // 黑方玩家：保持原样（黑方本来就在上方row=6,7,9）
+            return { col, row };
         }
     }
     // 单人模式或未分配身份时保持原样
@@ -1579,13 +1579,13 @@ function updateSetupPlayerIdentity() {
 
     if (isOnlineMode && gameMode === 'setup') {
         if (playerSide === 'red') {
-            // 红方玩家 - 显示在下方（我方）
-            redIdentity.textContent = '本局您为红方（我方）';
+            // 红方玩家 - 显示在上方（我方）
+            redIdentity.textContent = '本局您为红方（我方在上方）';
             redIdentity.style.display = 'block';
             blackIdentity.style.display = 'none';
         } else if (playerSide === 'black') {
-            // 黑方玩家 - 显示在下方（我方），但实际上是黑方存储区
-            blackIdentity.textContent = '本局您为黑方（我方）';
+            // 黑方玩家 - 显示在上方（我方）
+            blackIdentity.textContent = '本局您为黑方（我方在上方）';
             blackIdentity.style.display = 'block';
             redIdentity.style.display = 'none';
         } else {
