@@ -2166,25 +2166,20 @@ function startLanGame() {
 }
 
 function startRemoteGame() {
-    // 从配置文件获取默认远程服务器地址
-    const defaultRemoteServer = window.CHESS_CONFIG ? window.CHESS_CONFIG.DEFAULT_REMOTE_SERVER : 'wss://your-codespace-name-3000.preview.app.github.dev';
+    let serverUrl;
 
-    // 可以让用户输入自定义服务器地址，或使用默认地址
-    let serverUrl = prompt('请输入远程服务器地址（留空使用默认服务器）:', defaultRemoteServer);
-
-    if (serverUrl === null) {
-        // 用户取消了
-        return;
-    }
-
-    if (!serverUrl.trim()) {
+    // 自动检测Codespaces环境
+    if (window.location.hostname.includes('.preview.app.github.dev') ||
+        window.location.hostname.includes('.app.github.dev')) {
+        // 在Codespaces环境中，直接使用当前域名
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        serverUrl = `${protocol}//${window.location.host}`;
+        console.log('检测到Codespaces环境，使用当前地址:', serverUrl);
+    } else {
+        // 不在Codespaces环境中，使用配置文件中的默认地址
+        const defaultRemoteServer = window.CHESS_CONFIG ? window.CHESS_CONFIG.DEFAULT_REMOTE_SERVER : 'wss://your-codespace-name-3000.preview.app.github.dev';
         serverUrl = defaultRemoteServer;
-    }
-
-    // 确保URL格式正确
-    if (!serverUrl.startsWith('ws://') && !serverUrl.startsWith('wss://') &&
-        !serverUrl.startsWith('http://') && !serverUrl.startsWith('https://')) {
-        serverUrl = 'wss://' + serverUrl;
+        console.log('使用配置的远程服务器地址:', serverUrl);
     }
 
     isOnlineMode = true;
