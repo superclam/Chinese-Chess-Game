@@ -576,7 +576,9 @@ function showAvailablePlacements(pieceName, color) {
     for (let row = 0; row < 10; row++) {
         for (let col = 0; col < 9; col++) {
             if (canPieceBePlacedAt(pieceName, col, row, color) && !boardState[`${col},${row}`]) {
-                const position = grid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
+                // 转换逻辑坐标为显示坐标
+                const displayCoords = logicToDisplay(col, row);
+                const position = grid.querySelector(`[data-col="${displayCoords.col}"][data-row="${displayCoords.row}"]`);
                 if (position) {
                     position.classList.add('available-placement');
                 }
@@ -1342,6 +1344,30 @@ function movePiece(fromCol, fromRow, toCol, toRow) {
     }
 }
 
+// 坐标转换函数：将逻辑坐标转换为显示坐标
+function logicToDisplay(col, row) {
+    // 如果是黑方玩家，翻转棋盘
+    if (isOnlineMode && playerSide === 'black') {
+        return {
+            col: 8 - col,  // 列翻转
+            row: 9 - row   // 行翻转
+        };
+    }
+    return { col, row };
+}
+
+// 坐标转换函数：将显示坐标转换为逻辑坐标
+function displayToLogic(col, row) {
+    // 如果是黑方玩家，翻转棋盘
+    if (isOnlineMode && playerSide === 'black') {
+        return {
+            col: 8 - col,  // 列翻转
+            row: 9 - row   // 行翻转
+        };
+    }
+    return { col, row };
+}
+
 // 渲染棋盘
 function renderBoard() {
     const currentGrid = gameMode === 'setup' ? grid : gameGrid;
@@ -1354,7 +1380,9 @@ function renderBoard() {
         for (let col = 0; col < 9; col++) {
             const pieceKey = `${col},${row}`;
             if (boardState[pieceKey]) {
-                const position = currentGrid.querySelector(`[data-col="${col}"][data-row="${row}"]`);
+                // 转换为显示坐标
+                const displayCoords = logicToDisplay(col, row);
+                const position = currentGrid.querySelector(`[data-col="${displayCoords.col}"][data-row="${displayCoords.row}"]`);
                 if (position) {
                     const piece = document.createElement('img');
                     piece.className = 'chess-piece';
@@ -1461,9 +1489,9 @@ function renderBoard() {
                                 piece.style.cursor = 'grabbing';
                                 e.dataTransfer.effectAllowed = 'move';
                                 e.dataTransfer.setData('text/html', piece.outerHTML);
-                                // 标记这是从棋盘拖拽的棋子
+                                // 标记这是从棋盘拖拽的棋子，使用逻辑坐标
                                 piece.dataset.fromBoard = 'true';
-                                piece.dataset.boardCol = col;
+                                piece.dataset.boardCol = col;  // 这里的col,row已经是逻辑坐标
                                 piece.dataset.boardRow = row;
                             });
 
@@ -1537,13 +1565,13 @@ function updateSetupPlayerIdentity() {
 
     if (isOnlineMode && gameMode === 'setup') {
         if (playerSide === 'red') {
-            // 红方玩家
-            redIdentity.textContent = '本局您为红方';
+            // 红方玩家 - 显示在下方（我方）
+            redIdentity.textContent = '本局您为红方（我方）';
             redIdentity.style.display = 'block';
             blackIdentity.style.display = 'none';
         } else if (playerSide === 'black') {
-            // 黑方玩家
-            blackIdentity.textContent = '本局您为黑方';
+            // 黑方玩家 - 显示在下方（我方），但实际上是黑方存储区
+            blackIdentity.textContent = '本局您为黑方（我方）';
             blackIdentity.style.display = 'block';
             redIdentity.style.display = 'none';
         } else {
@@ -1625,10 +1653,15 @@ function createBoard(gridElement, isSetupMode = false) {
                         const pieceName = selectedStoragePiece.dataset.piece;
                         const pieceColor = selectedStoragePiece.dataset.color;
 
+                        // 转换显示坐标为逻辑坐标
+                        const logicCoords = displayToLogic(col, row);
+                        const logicCol = logicCoords.col;
+                        const logicRow = logicCoords.row;
+
                         // 检查是否可以放置在这个位置
-                        if (canPieceBePlacedAt(pieceName, col, row, pieceColor) && !boardState[`${col},${row}`]) {
+                        if (canPieceBePlacedAt(pieceName, logicCol, logicRow, pieceColor) && !boardState[`${logicCol},${logicRow}`]) {
                             // 放置棋子到棋盘
-                            boardState[`${col},${row}`] = pieceName;
+                            boardState[`${logicCol},${logicRow}`] = pieceName;
 
                             // 更新存储区数量
                             const currentCount = parseInt(selectedStoragePiece.dataset.currentCount);
@@ -1684,14 +1717,19 @@ function createBoard(gridElement, isSetupMode = false) {
                             return;
                         }
 
+                        // 转换显示坐标为逻辑坐标
+                        const logicCoords = displayToLogic(col, row);
+                        const logicCol = logicCoords.col;
+                        const logicRow = logicCoords.row;
+
                         // 如果是从棋盘拖拽的棋子，需要检查目标位置是否为空或者是原位置
                         const isOriginalPosition = isFromBoard &&
-                            parseInt(draggedPiece.dataset.boardCol) === col &&
-                            parseInt(draggedPiece.dataset.boardRow) === row;
+                            parseInt(draggedPiece.dataset.boardCol) === logicCol &&
+                            parseInt(draggedPiece.dataset.boardRow) === logicRow;
 
-                        const targetIsEmpty = !boardState[`${col},${row}`] || isOriginalPosition;
+                        const targetIsEmpty = !boardState[`${logicCol},${logicRow}`] || isOriginalPosition;
 
-                        if (canPieceBePlacedAt(pieceName, col, row, pieceColor) && targetIsEmpty) {
+                        if (canPieceBePlacedAt(pieceName, logicCol, logicRow, pieceColor) && targetIsEmpty) {
                             e.dataTransfer.dropEffect = 'move';
                             position.classList.add('drag-over-valid');
                             position.classList.remove('drag-over-invalid');
@@ -1723,14 +1761,19 @@ function createBoard(gridElement, isSetupMode = false) {
                             return; // 没有权限，直接返回
                         }
 
+                        // 转换显示坐标为逻辑坐标
+                        const logicCoords = displayToLogic(col, row);
+                        const logicCol = logicCoords.col;
+                        const logicRow = logicCoords.row;
+
                         // 如果是从棋盘拖拽的棋子，需要检查目标位置是否为空或者是原位置
                         const isOriginalPosition = isFromBoard &&
-                            parseInt(draggedPiece.dataset.boardCol) === col &&
-                            parseInt(draggedPiece.dataset.boardRow) === row;
+                            parseInt(draggedPiece.dataset.boardCol) === logicCol &&
+                            parseInt(draggedPiece.dataset.boardRow) === logicRow;
 
-                        const targetIsEmpty = !boardState[`${col},${row}`] || isOriginalPosition;
+                        const targetIsEmpty = !boardState[`${logicCol},${logicRow}`] || isOriginalPosition;
 
-                        if (canPieceBePlacedAt(pieceName, col, row, pieceColor) && targetIsEmpty) {
+                        if (canPieceBePlacedAt(pieceName, logicCol, logicRow, pieceColor) && targetIsEmpty) {
                             // 有效放置
                             if (isFromBoard) {
                                 // 从棋盘拖拽：移除原位置的棋子
@@ -1740,14 +1783,14 @@ function createBoard(gridElement, isSetupMode = false) {
 
                                 // 如果不是拖回原位置，则在新位置放置棋子
                                 if (!isOriginalPosition) {
-                                    boardState[`${col},${row}`] = pieceName;
+                                    boardState[`${logicCol},${logicRow}`] = pieceName;
                                 } else {
                                     // 拖回原位置，重新放置
-                                    boardState[`${col},${row}`] = pieceName;
+                                    boardState[`${logicCol},${logicRow}`] = pieceName;
                                 }
                             } else {
                                 // 从存储区拖拽：正常处理
-                                boardState[`${col},${row}`] = pieceName;
+                                boardState[`${logicCol},${logicRow}`] = pieceName;
 
                                 // 更新存储区数量
                                 const currentCount = parseInt(draggedPiece.dataset.currentCount);
@@ -1784,8 +1827,10 @@ function createBoard(gridElement, isSetupMode = false) {
             } else {
                 // 游戏模式：添加点击事件
                 position.addEventListener('click', () => {
-                    const clickedCol = parseInt(col);
-                    const clickedRow = parseInt(row);
+                    // 转换显示坐标为逻辑坐标
+                    const logicCoords = displayToLogic(col, row);
+                    const clickedCol = logicCoords.col;
+                    const clickedRow = logicCoords.row;
                     const clickedPiece = boardState[`${clickedCol},${clickedRow}`];
 
                     if (selectedPosition) {
