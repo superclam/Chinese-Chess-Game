@@ -244,6 +244,9 @@ function syncGameState(newGameState) {
 function syncMove(move) {
     const { fromCol, fromRow, toCol, toRow } = move;
 
+    console.log(`同步移动: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
+    console.log(`当前模式: ${gameMode}, 联机模式: ${isOnlineMode}, 玩家身份: ${playerSide}`);
+
     // 先清除之前的移动历史显示
     if (isOnlineMode && gameMode === 'playing') {
         clearMoveHistory();
@@ -254,6 +257,7 @@ function syncMove(move) {
 
     // 显示对方移动的历史（红色三角框）
     if (isOnlineMode && gameMode === 'playing') {
+        console.log(`显示移动历史: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
         showMoveHistory(fromCol, fromRow, toCol, toRow);
         switchTurn();
     }
@@ -1181,8 +1185,12 @@ function clearMoveHistory() {
 
 // 显示移动历史（联机模式下的起点和终点红色三角框）
 function showMoveHistory(fromCol, fromRow, toCol, toRow) {
+    console.log(`showMoveHistory 被调用: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
+    console.log(`检查条件: isOnlineMode=${isOnlineMode}, gameMode=${gameMode}`);
+
     // 只在联机模式下显示移动历史
     if (!isOnlineMode || gameMode !== 'playing') {
+        console.log('不满足显示条件，退出');
         return;
     }
 
@@ -1199,19 +1207,28 @@ function showMoveHistory(fromCol, fromRow, toCol, toRow) {
     const fromDisplayCoords = logicToDisplay(fromCol, fromRow);
     const toDisplayCoords = logicToDisplay(toCol, toRow);
 
+    console.log(`坐标转换: 逻辑(${fromCol},${fromRow}) -> 显示(${fromDisplayCoords.col},${fromDisplayCoords.row})`);
+    console.log(`坐标转换: 逻辑(${toCol},${toRow}) -> 显示(${toDisplayCoords.col},${toDisplayCoords.row})`);
+
     // 获取当前游戏棋盘
     const currentGrid = gameGrid;
 
     // 显示起点红色三角框
     const fromPosition = currentGrid.querySelector(`[data-col="${fromDisplayCoords.col}"][data-row="${fromDisplayCoords.row}"]`);
     if (fromPosition) {
+        console.log('找到起点位置，添加红色三角框');
         addCornerFrames(fromPosition, 'move-from');
+    } else {
+        console.log('未找到起点位置');
     }
 
     // 显示终点红色三角框
     const toPosition = currentGrid.querySelector(`[data-col="${toDisplayCoords.col}"][data-row="${toDisplayCoords.row}"]`);
     if (toPosition) {
+        console.log('找到终点位置，添加红色三角框');
         addCornerFrames(toPosition, 'move-to');
+    } else {
+        console.log('未找到终点位置');
     }
 }
 
@@ -1462,6 +1479,9 @@ function displayToLogic(col, row) {
 function renderBoard() {
     const currentGrid = gameMode === 'setup' ? grid : gameGrid;
 
+    // 保存当前的移动历史状态
+    const savedMoveHistory = lastMovePositions;
+
     // 清空现有棋子
     currentGrid.querySelectorAll('.chess-piece').forEach(piece => piece.remove());
 
@@ -1600,6 +1620,12 @@ function renderBoard() {
                 }
             }
         }
+    }
+
+    // 恢复移动历史显示（如果有的话）
+    if (savedMoveHistory && isOnlineMode && gameMode === 'playing') {
+        const { from, to } = savedMoveHistory;
+        showMoveHistory(from[0], from[1], to[0], to[1]);
     }
 }
 
