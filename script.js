@@ -1346,25 +1346,39 @@ function movePiece(fromCol, fromRow, toCol, toRow) {
 
 // 坐标转换函数：将逻辑坐标转换为显示坐标
 function logicToDisplay(col, row) {
-    // 如果是黑方玩家，翻转棋盘
-    if (isOnlineMode && playerSide === 'black') {
-        return {
-            col: 8 - col,  // 列翻转
-            row: 9 - row   // 行翻转
-        };
+    // 在联机模式下，让我方始终在下方
+    if (isOnlineMode && playerSide) {
+        if (playerSide === 'red') {
+            // 红方玩家：保持原样（红方本来就在下方row=0,2,3）
+            return { col, row };
+        } else if (playerSide === 'black') {
+            // 黑方玩家：翻转棋盘让黑方在下方
+            return {
+                col: 8 - col,  // 列翻转
+                row: 9 - row   // 行翻转
+            };
+        }
     }
+    // 单人模式或未分配身份时保持原样
     return { col, row };
 }
 
 // 坐标转换函数：将显示坐标转换为逻辑坐标
 function displayToLogic(col, row) {
-    // 如果是黑方玩家，翻转棋盘
-    if (isOnlineMode && playerSide === 'black') {
-        return {
-            col: 8 - col,  // 列翻转
-            row: 9 - row   // 行翻转
-        };
+    // 在联机模式下，让我方始终在下方
+    if (isOnlineMode && playerSide) {
+        if (playerSide === 'red') {
+            // 红方玩家：保持原样（红方本来就在下方row=0,2,3）
+            return { col, row };
+        } else if (playerSide === 'black') {
+            // 黑方玩家：翻转棋盘让黑方在下方
+            return {
+                col: 8 - col,  // 列翻转
+                row: 9 - row   // 行翻转
+            };
+        }
     }
+    // 单人模式或未分配身份时保持原样
     return { col, row };
 }
 
