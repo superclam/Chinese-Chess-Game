@@ -240,55 +240,56 @@ function syncGameState(newGameState) {
     }
 }
 
-// 同步移动 - 检测到敌方棋子移动时添加红色框
+// 同步移动 - 敌方检测到我方棋子位置变动时添加红色框
 function syncMove(move) {
     const { fromCol, fromRow, toCol, toRow } = move;
 
-    console.log(`检测到敌方移动: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
+    console.log(`检测到对方移动: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
 
-    // 检查移动的棋子是否为敌方棋子
+    // 检查移动的棋子是否为对方棋子（相对于当前玩家来说）
     const movingPiece = boardState[`${fromCol},${fromRow}`];
     if (movingPiece) {
         const pieceColor = movingPiece.startsWith('红') ? 'red' : 'black';
-        const isEnemyPiece = (playerSide && pieceColor !== playerSide);
+        const isOpponentPiece = (playerSide && pieceColor !== playerSide);
 
-        console.log(`移动棋子: ${movingPiece}, 棋子颜色: ${pieceColor}, 我方身份: ${playerSide}, 是否敌方: ${isEnemyPiece}`);
+        console.log(`移动棋子: ${movingPiece}, 棋子颜色: ${pieceColor}, 我方身份: ${playerSide}, 是否对方棋子: ${isOpponentPiece}`);
 
-        if (isEnemyPiece) {
-            console.log('确认为敌方棋子移动，准备添加红色标记');
+        // 清除之前的移动历史显示
+        clearMoveHistory();
 
-            // 清除之前的移动历史显示
-            clearMoveHistory();
+        // 执行移动（更新棋盘状态）
+        movePiece(fromCol, fromRow, toCol, toRow, true);
 
-            // 执行移动
-            movePiece(fromCol, fromRow, toCol, toRow, true);
+        // 如果是对方棋子移动，在敌方界面显示对方棋子移动的红色标记
+        if (isOpponentPiece && isOnlineMode && gameMode === 'playing') {
+            console.log('检测到对方棋子位置变动，准备在敌方界面添加红色标记');
 
-            // 在敌方棋子移动的起点和终点添加红色框
+            // 延迟添加红色框，确保棋盘更新完成
             setTimeout(() => {
                 // 转换逻辑坐标为显示坐标
                 const fromDisplayCoords = logicToDisplay(fromCol, fromRow);
                 const toDisplayCoords = logicToDisplay(toCol, toRow);
 
-                console.log(`添加红色框: 起点显示坐标(${fromDisplayCoords.col},${fromDisplayCoords.row}) 终点显示坐标(${toDisplayCoords.col},${toDisplayCoords.row})`);
+                console.log(`对方棋子移动标记: 起点显示坐标(${fromDisplayCoords.col},${fromDisplayCoords.row}) 终点显示坐标(${toDisplayCoords.col},${toDisplayCoords.row})`);
 
                 // 获取游戏棋盘上的位置元素
                 const fromPosition = gameGrid.querySelector(`[data-col="${fromDisplayCoords.col}"][data-row="${fromDisplayCoords.row}"]`);
                 const toPosition = gameGrid.querySelector(`[data-col="${toDisplayCoords.col}"][data-row="${toDisplayCoords.row}"]`);
 
-                // 添加起点红色三角框
+                // 在对方棋子的起点添加红色三角框
                 if (fromPosition) {
                     addCornerFrames(fromPosition, 'move-from');
-                    console.log('✅ 敌方移动起点红色三角框已添加');
+                    console.log('✅ 对方棋子移动起点红色三角框已添加');
                 } else {
-                    console.log('❌ 未找到敌方移动起点位置');
+                    console.log('❌ 未找到对方棋子移动起点位置');
                 }
 
-                // 添加终点红色三角框
+                // 在对方棋子的终点添加红色三角框
                 if (toPosition) {
                     addCornerFrames(toPosition, 'move-to');
-                    console.log('✅ 敌方移动终点红色三角框已添加');
+                    console.log('✅ 对方棋子移动终点红色三角框已添加');
                 } else {
-                    console.log('❌ 未找到敌方移动终点位置');
+                    console.log('❌ 未找到对方棋子移动终点位置');
                 }
 
                 // 保存移动历史
@@ -296,17 +297,12 @@ function syncMove(move) {
                     from: [fromCol, fromRow],
                     to: [toCol, toRow]
                 };
-            }, 50); // 延迟50ms确保DOM更新完成
-
-            switchTurn();
+            }, 100); // 延迟100ms确保DOM和棋盘完全更新
         } else {
-            console.log('非敌方棋子移动，跳过红色标记');
-            // 清除之前的移动历史显示
-            clearMoveHistory();
-            // 执行移动
-            movePiece(fromCol, fromRow, toCol, toRow, true);
-            switchTurn();
+            console.log('非对方棋子移动或非游戏状态，跳过红色标记');
         }
+
+        switchTurn();
     } else {
         console.log('未找到移动的棋子，执行普通同步');
         // 清除之前的移动历史显示
