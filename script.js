@@ -1273,19 +1273,57 @@ function showMoveHistory(fromCol, fromRow, toCol, toRow) {
 // 添加四个角的三角框架（围绕棋子图片或空位）
 function addCornerFrames(position, type = 'selected') {
     console.log(`addCornerFrames 被调用，类型: ${type}`);
+    console.log(`目标位置元素:`, position);
+    console.log(`位置元素当前类名: ${position.className}`);
+
+    // 先清除该位置的现有角框
+    position.querySelectorAll('.corner-frame, .corner-bottom').forEach(corner => {
+        corner.remove();
+    });
 
     // 添加两个元素，每个元素用::before和::after创建两个三角形
     const topCorners = document.createElement('div');
     topCorners.className = 'corner-frame';
     position.appendChild(topCorners);
+    console.log(`topCorners 已添加:`, topCorners);
 
     const bottomCorners = document.createElement('div');
     bottomCorners.className = 'corner-bottom';
     position.appendChild(bottomCorners);
+    console.log(`bottomCorners 已添加:`, bottomCorners);
 
     position.classList.add(type);
 
-    console.log(`角框已添加到位置，类名: ${position.className}`);
+    console.log(`角框添加完成，最终类名: ${position.className}`);
+    console.log(`位置元素子元素数量: ${position.children.length}`);
+
+    // 验证角框是否真的添加成功
+    const frames = position.querySelectorAll('.corner-frame, .corner-bottom');
+    console.log(`验证：找到 ${frames.length} 个角框元素`);
+
+    // 强制触发重绘
+    position.offsetHeight;
+}
+
+// 测试函数：手动添加红色三角框到第一个位置
+function testRedTriangles() {
+    console.log('开始测试红色三角框...');
+    const firstPosition = gameGrid.querySelector('.position');
+    if (firstPosition) {
+        console.log('找到第一个位置，添加测试红色框');
+        addCornerFrames(firstPosition, 'move-from');
+
+        // 3秒后添加另一个测试框
+        setTimeout(() => {
+            const secondPosition = gameGrid.querySelectorAll('.position')[10];
+            if (secondPosition) {
+                console.log('添加第二个测试红色框');
+                addCornerFrames(secondPosition, 'move-to');
+            }
+        }, 3000);
+    } else {
+        console.log('未找到测试位置');
+    }
 }
 
 // 重新游戏函数
