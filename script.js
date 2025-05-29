@@ -243,11 +243,19 @@ function syncGameState(newGameState) {
 // 同步移动
 function syncMove(move) {
     const { fromCol, fromRow, toCol, toRow } = move;
-    movePiece(fromCol, fromRow, toCol, toRow);
 
-    // 确保同步移动时也显示移动历史
+    // 先清除之前的移动历史显示
+    if (isOnlineMode && gameMode === 'playing') {
+        clearMoveHistory();
+    }
+
+    // 执行移动（跳过移动历史显示和回合切换，因为这是对方的移动）
+    movePiece(fromCol, fromRow, toCol, toRow, true);
+
+    // 显示对方移动的历史（红色三角框）
     if (isOnlineMode && gameMode === 'playing') {
         showMoveHistory(fromCol, fromRow, toCol, toRow);
+        switchTurn();
     }
 }
 
@@ -1334,7 +1342,7 @@ function showVictoryMessage(message) {
 }
 
 // 移动棋子
-function movePiece(fromCol, fromRow, toCol, toRow) {
+function movePiece(fromCol, fromRow, toCol, toRow, skipMoveHistory = false) {
     const fromKey = `${fromCol},${fromRow}`;
     const toKey = `${toCol},${toRow}`;
 
@@ -1405,8 +1413,8 @@ function movePiece(fromCol, fromRow, toCol, toRow) {
     // 重新渲染棋盘
     renderBoard();
 
-    // 在联机模式下显示移动历史
-    if (isOnlineMode && gameMode === 'playing') {
+    // 在联机模式下显示移动历史（除非明确跳过）
+    if (isOnlineMode && gameMode === 'playing' && !skipMoveHistory) {
         showMoveHistory(fromCol, fromRow, toCol, toRow);
         switchTurn();
     }
