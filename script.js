@@ -1311,6 +1311,31 @@ function testRedTriangles() {
     const firstPosition = gameGrid.querySelector('.position');
     if (firstPosition) {
         console.log('找到第一个位置，添加测试红色框');
+
+        // 直接使用内联样式强制显示红色三角框
+        const testFrame = document.createElement('div');
+        testFrame.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        `;
+
+        // 添加四个红色三角形
+        testFrame.innerHTML = `
+            <div style="position: absolute; top: -5px; left: -5px; width: 0; height: 0; border-left: 20px solid red; border-bottom: 20px solid transparent;"></div>
+            <div style="position: absolute; top: -5px; right: -5px; width: 0; height: 0; border-right: 20px solid red; border-bottom: 20px solid transparent;"></div>
+            <div style="position: absolute; bottom: -5px; left: -5px; width: 0; height: 0; border-left: 20px solid red; border-top: 20px solid transparent;"></div>
+            <div style="position: absolute; bottom: -5px; right: -5px; width: 0; height: 0; border-right: 20px solid red; border-top: 20px solid transparent;"></div>
+        `;
+
+        firstPosition.appendChild(testFrame);
+        console.log('强制样式红色框已添加');
+
+        // 同时测试原来的方法
         addCornerFrames(firstPosition, 'move-from');
 
         // 3秒后添加另一个测试框
