@@ -1580,12 +1580,12 @@ function updateSetupPlayerIdentity() {
     if (isOnlineMode && gameMode === 'setup') {
         if (playerSide === 'red') {
             // 红方玩家 - 显示在上方（我方）
-            redIdentity.textContent = '本局您为红方（我方在上方）';
+            redIdentity.textContent = '本局您为红方';
             redIdentity.style.display = 'block';
             blackIdentity.style.display = 'none';
         } else if (playerSide === 'black') {
             // 黑方玩家 - 显示在上方（我方）
-            blackIdentity.textContent = '本局您为黑方（我方在上方）';
+            blackIdentity.textContent = '本局您为黑方';
             blackIdentity.style.display = 'block';
             redIdentity.style.display = 'none';
         } else {
