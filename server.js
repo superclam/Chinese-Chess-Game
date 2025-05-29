@@ -215,6 +215,18 @@ wss.on('connection', (ws) => {
                     }
                     break;
 
+                case 'selection':
+                    // 处理选择状态
+                    if (ws.roomId && gameRooms.has(ws.roomId)) {
+                        const room = gameRooms.get(ws.roomId);
+                        room.broadcast({
+                            type: 'selection',
+                            selection: data.selection,
+                            playerId: ws.playerId
+                        }, ws);
+                    }
+                    break;
+
                 case 'ping':
                     // 心跳响应
                     ws.send(JSON.stringify({ type: 'pong' }));
@@ -246,7 +258,7 @@ wss.on('connection', (ws) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // 获取本机IP地址
 function getLocalIP() {

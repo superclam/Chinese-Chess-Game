@@ -152,6 +152,13 @@ function handleServerMessage(data) {
             }
             break;
 
+        case 'selection':
+            // 同步选择状态
+            if (data.playerId !== playerId) {
+                syncSelection(data.selection);
+            }
+            break;
+
         case 'error':
             console.error('服务器错误:', data.message);
             break;
@@ -213,6 +220,25 @@ function sendMove(move) {
             type: 'move',
             move: move
         }));
+
+        // 同时发送移动的起始点和终点选择状态
+        sendSelection({
+            type: 'move',
+            fromCol: move.fromCol,
+            fromRow: move.fromRow,
+            toCol: move.toCol,
+            toRow: move.toRow
+        });
+    }
+}
+
+// 发送选择状态
+function sendSelection(selection) {
+    if (websocket && websocket.readyState === WebSocket.OPEN) {
+        websocket.send(JSON.stringify({
+            type: 'selection',
+            selection: selection
+        }));
     }
 }
 
@@ -240,76 +266,60 @@ function syncGameState(newGameState) {
     }
 }
 
-// 同步移动 - 敌方检测到我方棋子位置变动时添加红色框
+// 同步移动
 function syncMove(move) {
     const { fromCol, fromRow, toCol, toRow } = move;
 
-    console.log(`检测到对方移动: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
+    // 清除我方的移动历史显示（红色框）
+    clearMoveHistory();
 
-    // 检查移动的棋子是否为对方棋子（相对于当前玩家来说）
-    const movingPiece = boardState[`${fromCol},${fromRow}`];
-    if (movingPiece) {
-        const pieceColor = movingPiece.startsWith('红') ? 'red' : 'black';
-        const isOpponentPiece = (playerSide && pieceColor !== playerSide);
+    movePiece(fromCol, fromRow, toCol, toRow);
 
-        console.log(`移动棋子: ${movingPiece}, 棋子颜色: ${pieceColor}, 我方身份: ${playerSide}, 是否对方棋子: ${isOpponentPiece}`);
+    // 确保同步移动时也显示移动历史
+    if (isOnlineMode && gameMode === 'playing') {
+        showMoveHistory(fromCol, fromRow, toCol, toRow);
+    }
+}
 
-        // 清除之前的移动历史显示
-        clearMoveHistory();
+// 同步选择状态
+function syncSelection(selection) {
+    if (!isOnlineMode || gameMode !== 'playing') {
+        return;
+    }
 
-        // 执行移动（更新棋盘状态）
-        movePiece(fromCol, fromRow, toCol, toRow, true);
+    // 只清除敌方的选择状态，保留我方的选择状态
+    document.querySelectorAll('.position').forEach(pos => {
+        pos.classList.remove('enemy-move-from', 'enemy-move-to');
+        // 只移除敌方的角框元素，保留我方的
+        pos.querySelectorAll('.corner-frame, .corner-bottom').forEach(corner => {
+            const parent = corner.parentElement;
+            if (parent && (parent.classList.contains('enemy-move-from') ||
+                          parent.classList.contains('enemy-move-to'))) {
+                corner.remove();
+            }
+        });
+    });
 
-        // 如果是对方棋子移动，在敌方界面显示对方棋子移动的红色标记
-        if (isOpponentPiece && isOnlineMode && gameMode === 'playing') {
-            console.log('检测到对方棋子位置变动，准备在敌方界面添加红色标记');
+    // 只处理移动类型
+    if (selection.type === 'move' &&
+        selection.fromCol !== undefined && selection.fromRow !== undefined &&
+        selection.toCol !== undefined && selection.toRow !== undefined) {
+        // 显示敌方移动的起始点和终点（转换坐标）
+        const fromDisplayCoords = logicToDisplay(selection.fromCol, selection.fromRow);
+        const toDisplayCoords = logicToDisplay(selection.toCol, selection.toRow);
+        const currentGrid = gameGrid;
 
-            // 延迟添加红色框，确保棋盘更新完成
-            setTimeout(() => {
-                // 转换逻辑坐标为显示坐标
-                const fromDisplayCoords = logicToDisplay(fromCol, fromRow);
-                const toDisplayCoords = logicToDisplay(toCol, toRow);
-
-                console.log(`对方棋子移动标记: 起点显示坐标(${fromDisplayCoords.col},${fromDisplayCoords.row}) 终点显示坐标(${toDisplayCoords.col},${toDisplayCoords.row})`);
-
-                // 获取游戏棋盘上的位置元素
-                const fromPosition = gameGrid.querySelector(`[data-col="${fromDisplayCoords.col}"][data-row="${fromDisplayCoords.row}"]`);
-                const toPosition = gameGrid.querySelector(`[data-col="${toDisplayCoords.col}"][data-row="${toDisplayCoords.row}"]`);
-
-                // 在对方棋子的起点添加红色三角框
-                if (fromPosition) {
-                    addCornerFrames(fromPosition, 'move-from');
-                    console.log('✅ 对方棋子移动起点红色三角框已添加');
-                } else {
-                    console.log('❌ 未找到对方棋子移动起点位置');
-                }
-
-                // 在对方棋子的终点添加红色三角框
-                if (toPosition) {
-                    addCornerFrames(toPosition, 'move-to');
-                    console.log('✅ 对方棋子移动终点红色三角框已添加');
-                } else {
-                    console.log('❌ 未找到对方棋子移动终点位置');
-                }
-
-                // 保存移动历史
-                lastMovePositions = {
-                    from: [fromCol, fromRow],
-                    to: [toCol, toRow]
-                };
-            }, 100); // 延迟100ms确保DOM和棋盘完全更新
-        } else {
-            console.log('非对方棋子移动或非游戏状态，跳过红色标记');
+        // 显示起始点
+        const fromPosition = currentGrid.querySelector(`[data-col="${fromDisplayCoords.col}"][data-row="${fromDisplayCoords.row}"]`);
+        if (fromPosition) {
+            addCornerFrames(fromPosition, 'enemy-move-from');
         }
 
-        switchTurn();
-    } else {
-        console.log('未找到移动的棋子，执行普通同步');
-        // 清除之前的移动历史显示
-        clearMoveHistory();
-        // 执行移动
-        movePiece(fromCol, fromRow, toCol, toRow, true);
-        switchTurn();
+        // 显示终点
+        const toPosition = currentGrid.querySelector(`[data-col="${toDisplayCoords.col}"][data-row="${toDisplayCoords.row}"]`);
+        if (toPosition) {
+            addCornerFrames(toPosition, 'enemy-move-to');
+        }
     }
 }
 
@@ -1214,7 +1224,7 @@ function isValidMove(fromCol, fromRow, toCol, toRow, piece) {
 // 清除所有高亮和角框
 function clearHighlights() {
     document.querySelectorAll('.position').forEach(pos => {
-        pos.classList.remove('selected', 'empty-target');
+        pos.classList.remove('selected', 'empty-target', 'enemy-move-from', 'enemy-move-to');
         // 移除角框元素
         pos.querySelectorAll('.corner-frame, .corner-bottom').forEach(corner => {
             corner.remove();
@@ -1231,7 +1241,6 @@ function clearMoveHistory() {
             corner.remove();
         });
     });
-    console.log('移动历史已清除');
 }
 
 // 显示移动历史（联机模式下的起点和终点红色三角框）
@@ -1272,83 +1281,16 @@ function showMoveHistory(fromCol, fromRow, toCol, toRow) {
 
 // 添加四个角的三角框架（围绕棋子图片或空位）
 function addCornerFrames(position, type = 'selected') {
-    console.log(`addCornerFrames 被调用，类型: ${type}`);
-    console.log(`目标位置元素:`, position);
-    console.log(`位置元素当前类名: ${position.className}`);
-
-    // 先清除该位置的现有角框
-    position.querySelectorAll('.corner-frame, .corner-bottom').forEach(corner => {
-        corner.remove();
-    });
-
     // 添加两个元素，每个元素用::before和::after创建两个三角形
     const topCorners = document.createElement('div');
     topCorners.className = 'corner-frame';
     position.appendChild(topCorners);
-    console.log(`topCorners 已添加:`, topCorners);
 
     const bottomCorners = document.createElement('div');
     bottomCorners.className = 'corner-bottom';
     position.appendChild(bottomCorners);
-    console.log(`bottomCorners 已添加:`, bottomCorners);
 
     position.classList.add(type);
-
-    console.log(`角框添加完成，最终类名: ${position.className}`);
-    console.log(`位置元素子元素数量: ${position.children.length}`);
-
-    // 验证角框是否真的添加成功
-    const frames = position.querySelectorAll('.corner-frame, .corner-bottom');
-    console.log(`验证：找到 ${frames.length} 个角框元素`);
-
-    // 强制触发重绘
-    position.offsetHeight;
-}
-
-// 测试函数：手动添加红色三角框到第一个位置
-function testRedTriangles() {
-    console.log('开始测试红色三角框...');
-    const firstPosition = gameGrid.querySelector('.position');
-    if (firstPosition) {
-        console.log('找到第一个位置，添加测试红色框');
-
-        // 直接使用内联样式强制显示红色三角框
-        const testFrame = document.createElement('div');
-        testFrame.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        `;
-
-        // 添加四个红色三角形
-        testFrame.innerHTML = `
-            <div style="position: absolute; top: -5px; left: -5px; width: 0; height: 0; border-left: 20px solid red; border-bottom: 20px solid transparent;"></div>
-            <div style="position: absolute; top: -5px; right: -5px; width: 0; height: 0; border-right: 20px solid red; border-bottom: 20px solid transparent;"></div>
-            <div style="position: absolute; bottom: -5px; left: -5px; width: 0; height: 0; border-left: 20px solid red; border-top: 20px solid transparent;"></div>
-            <div style="position: absolute; bottom: -5px; right: -5px; width: 0; height: 0; border-right: 20px solid red; border-top: 20px solid transparent;"></div>
-        `;
-
-        firstPosition.appendChild(testFrame);
-        console.log('强制样式红色框已添加');
-
-        // 同时测试原来的方法
-        addCornerFrames(firstPosition, 'move-from');
-
-        // 3秒后添加另一个测试框
-        setTimeout(() => {
-            const secondPosition = gameGrid.querySelectorAll('.position')[10];
-            if (secondPosition) {
-                console.log('添加第二个测试红色框');
-                addCornerFrames(secondPosition, 'move-to');
-            }
-        }, 3000);
-    } else {
-        console.log('未找到测试位置');
-    }
 }
 
 // 重新游戏函数
@@ -1464,7 +1406,7 @@ function showVictoryMessage(message) {
 }
 
 // 移动棋子
-function movePiece(fromCol, fromRow, toCol, toRow, skipMoveHistory = false) {
+function movePiece(fromCol, fromRow, toCol, toRow) {
     const fromKey = `${fromCol},${fromRow}`;
     const toKey = `${toCol},${toRow}`;
 
@@ -1535,8 +1477,8 @@ function movePiece(fromCol, fromRow, toCol, toRow, skipMoveHistory = false) {
     // 重新渲染棋盘
     renderBoard();
 
-    // 在联机模式下显示移动历史（除非明确跳过）
-    if (isOnlineMode && gameMode === 'playing' && !skipMoveHistory) {
+    // 在联机模式下显示移动历史
+    if (isOnlineMode && gameMode === 'playing') {
         showMoveHistory(fromCol, fromRow, toCol, toRow);
         switchTurn();
     }
@@ -1584,12 +1526,8 @@ function displayToLogic(col, row) {
 function renderBoard() {
     const currentGrid = gameMode === 'setup' ? grid : gameGrid;
 
-    // 保存当前的移动历史状态
-    const savedMoveHistory = lastMovePositions;
-
-    // 清空现有棋子（但保留角框元素）
+    // 清空现有棋子
     currentGrid.querySelectorAll('.chess-piece').forEach(piece => piece.remove());
-    console.log('棋子已清除，开始重新渲染');
 
     // 重新添加棋子
     for (let row = 0; row < 10; row++) {
@@ -1726,12 +1664,6 @@ function renderBoard() {
                 }
             }
         }
-    }
-
-    // 恢复移动历史显示（如果有的话）
-    if (savedMoveHistory && isOnlineMode && gameMode === 'playing') {
-        const { from, to } = savedMoveHistory;
-        showMoveHistory(from[0], from[1], to[0], to[1]);
     }
 }
 
@@ -2098,11 +2030,14 @@ function createBoard(gridElement, isSetupMode = false) {
                                 if (canSelectPiece(clickedPiece)) {
                                     selectedPosition = [clickedCol, clickedRow];
                                     addCornerFrames(position, 'selected');
+
+
                                 }
                             } else if (!clickedPiece) {
                                 // 点击空位，显示红色角框
                                 emptyTargetPosition = [clickedCol, clickedRow];
                                 addCornerFrames(position, 'empty-target');
+                                // 不发送空位选择状态
                             }
                         }
                     } else {
@@ -2123,11 +2058,14 @@ function createBoard(gridElement, isSetupMode = false) {
                                     if (canSelectPiece(clickedPiece)) {
                                         selectedPosition = [clickedCol, clickedRow];
                                         addCornerFrames(position, 'selected');
+
+
                                     }
                                 } else if (!clickedPiece) {
                                     // 点击其他空位，显示红色角框
                                     emptyTargetPosition = [clickedCol, clickedRow];
                                     addCornerFrames(position, 'empty-target');
+                                    // 不发送空位选择状态
                                 }
                             }
                         } else {
@@ -2138,11 +2076,14 @@ function createBoard(gridElement, isSetupMode = false) {
                                 if (canSelectPiece(clickedPiece)) {
                                     selectedPosition = [clickedCol, clickedRow];
                                     addCornerFrames(position, 'selected');
+
+
                                 }
                             } else if (!clickedPiece) {
                                 // 点击空位，显示红色角框
                                 emptyTargetPosition = [clickedCol, clickedRow];
                                 addCornerFrames(position, 'empty-target');
+                                // 不发送空位选择状态
                             }
                         }
                     }

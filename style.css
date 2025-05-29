@@ -607,6 +607,152 @@
 
 
 
+/* 四个角的三角框架 - 红色（敌方移动起始点） - 围绕棋子图片 */
+.position.enemy-move-from .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 红色 */
+.position.enemy-move-from .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 红色 */
+.position.enemy-move-from .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+.position.enemy-move-from .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 红色 */
+.position.enemy-move-from .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 红色 */
+.position.enemy-move-from .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 四个角的三角框架 - 红色（敌方移动终点） - 围绕目标位置 */
+.position.enemy-move-to .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 红色 */
+.position.enemy-move-to .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 红色 */
+.position.enemy-move-to .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+.position.enemy-move-to .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 红色 */
+.position.enemy-move-to .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 红色 */
+.position.enemy-move-to .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+
+
+
+
 /* 规则按钮样式 - 初始化阶段，使用绝对定位 */
 .rules-btn-setup {
     position: absolute;
