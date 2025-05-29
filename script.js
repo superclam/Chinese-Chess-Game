@@ -258,7 +258,12 @@ function syncMove(move) {
     // 显示对方移动的历史（红色三角框）
     if (isOnlineMode && gameMode === 'playing') {
         console.log(`显示移动历史: 从 (${fromCol},${fromRow}) 到 (${toCol},${toRow})`);
-        showMoveHistory(fromCol, fromRow, toCol, toRow);
+
+        // 使用 setTimeout 确保在 DOM 更新后显示移动历史
+        setTimeout(() => {
+            showMoveHistory(fromCol, fromRow, toCol, toRow);
+        }, 10);
+
         switchTurn();
     }
 }
@@ -1181,6 +1186,7 @@ function clearMoveHistory() {
             corner.remove();
         });
     });
+    console.log('移动历史已清除');
 }
 
 // 显示移动历史（联机模式下的起点和终点红色三角框）
@@ -1234,6 +1240,8 @@ function showMoveHistory(fromCol, fromRow, toCol, toRow) {
 
 // 添加四个角的三角框架（围绕棋子图片或空位）
 function addCornerFrames(position, type = 'selected') {
+    console.log(`addCornerFrames 被调用，类型: ${type}`);
+
     // 添加两个元素，每个元素用::before和::after创建两个三角形
     const topCorners = document.createElement('div');
     topCorners.className = 'corner-frame';
@@ -1244,6 +1252,8 @@ function addCornerFrames(position, type = 'selected') {
     position.appendChild(bottomCorners);
 
     position.classList.add(type);
+
+    console.log(`角框已添加到位置，类名: ${position.className}`);
 }
 
 // 重新游戏函数
@@ -1482,8 +1492,9 @@ function renderBoard() {
     // 保存当前的移动历史状态
     const savedMoveHistory = lastMovePositions;
 
-    // 清空现有棋子
+    // 清空现有棋子（但保留角框元素）
     currentGrid.querySelectorAll('.chess-piece').forEach(piece => piece.remove());
+    console.log('棋子已清除，开始重新渲染');
 
     // 重新添加棋子
     for (let row = 0; row < 10; row++) {
