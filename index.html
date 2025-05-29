@@ -28,6 +28,9 @@
 
         <!-- 初始化阶段的布局 -->
         <div class="setup-container" id="setupContainer">
+            <!-- 返回按钮 - 初始化界面 -->
+            <button class="start-game-btn return-btn" id="returnBtn" style="background-color: #4CAF50;">返回</button>
+
             <!-- 红方区域 -->
             <div style="display: flex; align-items: center;">
                 <!-- 红方身份显示 -->
@@ -57,7 +60,7 @@
             </div>
 
             <!-- 黑方区域 -->
-            <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; position: relative;">
                 <!-- 黑方棋子存储区 -->
                 <div class="piece-storage">
                     <h3>黑方棋子</h3>
@@ -67,6 +70,9 @@
                     <button class="start-game-btn" id="blackCompleteBtn" style="margin-top: 10px; width: 100%; font-size: 14px;">完成初始化</button>
                     <div id="blackStatus" style="margin-top: 10px; text-align: center; font-weight: bold; color: #666; display: none;">黑方已完成初始化</div>
                 </div>
+
+                <!-- 规则按钮 - 初始化阶段 -->
+                <button class="start-game-btn rules-btn-setup" id="rulesBtnSetup" style="background-color: #4CAF50;">规则</button>
 
                 <!-- 黑方身份显示 -->
                 <div id="blackPlayerIdentity" style="
@@ -80,9 +86,28 @@
         </div>
 
         <!-- 游戏阶段的布局 -->
-        <div class="chessboard" id="gameBoard" style="display: none;">
-            <img src="IMAGE/棋盘.jpg" alt="象棋棋盘">
-            <div class="grid" id="gameGrid"></div>
+        <div class="game-stage-container" id="gameBoard" style="display: none;">
+            <div class="chessboard">
+                <img src="IMAGE/棋盘.jpg" alt="象棋棋盘">
+                <div class="grid" id="gameGrid"></div>
+            </div>
+
+            <!-- 规则按钮 - 游戏阶段 -->
+            <button class="start-game-btn rules-btn-game" id="rulesBtnGame" style="background-color: #4CAF50;">规则</button>
+        </div>
+    </div>
+
+    <!-- 规则显示面板 -->
+    <div class="rules-panel" id="rulesPanel" style="display: none;">
+        <div class="rules-content">
+            <h2>游戏规则</h2>
+            <div class="rules-text">
+                <div class="rules-main-text">
+                    <span>吃</span>
+                    <span>掉</span>
+                    <span>将</span>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -21,6 +21,8 @@
 
 
 
+
+
 .menu-buttons {
     display: flex;
     flex-direction: column;
@@ -72,10 +74,12 @@
 .game-container {
     text-align: center;
     margin: 20px auto;
+    margin-left: -180px; /* 整体左移 180px */
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    position: relative;
 }
 
 .setup-container {
@@ -84,6 +88,7 @@
     align-items: flex-start;
     width: 1200px;
     margin: 0 auto;
+    position: relative; /* 为返回按钮提供定位基准 */
 }
 
 .piece-storage {
@@ -457,5 +462,271 @@
     border-right: 20px solid red;
     border-top: 20px solid transparent;
 }
+
+/* 四个角的三角框架 - 红色（移动历史起点） - 围绕棋子图片或空位 */
+.position.move-from .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 红色 */
+.position.move-from .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 红色 */
+.position.move-from .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+.position.move-from .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 红色 */
+.position.move-from .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 红色 */
+.position.move-from .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 四个角的三角框架 - 红色（移动历史终点） - 围绕棋子图片或空位 */
+.position.move-to .corner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左上角三角框 - 红色 */
+.position.move-to .corner-frame::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+/* 右上角三角框 - 红色 */
+.position.move-to .corner-frame::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-bottom: 20px solid transparent;
+}
+
+.position.move-to .corner-bottom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* 左下角三角框 - 红色 */
+.position.move-to .corner-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -5px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+/* 右下角三角框 - 红色 */
+.position.move-to .corner-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 0;
+    height: 0;
+    border-right: 20px solid red;
+    border-top: 20px solid transparent;
+}
+
+
+
+/* 规则按钮样式 - 初始化阶段，使用绝对定位 */
+.rules-btn-setup {
+    position: absolute;
+    top: 730px; /* 黑方储存区下方 */
+    left: 22px; /* 相对于页面中心，定位到黑方储存区正下方中心 */
+    width: 150px;
+    padding: 14px 20px;
+    margin: 0;
+    font-size: 20px;
+}
+
+/* 规则按钮样式 - 游戏阶段，使用绝对定位 */
+.rules-btn-game {
+    position: fixed;
+    bottom: 50px; /* 距离底部50px */
+    right: 50px; /* 距离右侧50px */
+    width: 150px;
+    padding: 14px 20px;
+    margin: 0;
+    font-size: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 100;
+}
+
+.rules-btn-game:hover {
+    background-color: #45a049;
+}
+
+/* 返回按钮样式 - 初始化界面，使用绝对定位 */
+.return-btn {
+    position: absolute;
+    top: 730px; /* 距离顶部500px */
+    left: 22px; /* 相对于页面中心，定位到黑方储存区正下方中心 */
+    width: 150px;
+    padding: 14px 20px;
+    margin: 0;
+    font-size: 20px;
+}
+
+/* 游戏阶段容器 */
+.game-stage-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 规则面板样式 */
+.rules-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 400px;
+    max-height: 80vh;
+    background-color: #f5f5f5;
+    border: 3px solid #4CAF50;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.rules-content {
+    padding: 20px;
+}
+
+.rules-content h2 {
+    color: #4CAF50;
+    text-align: center;
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.rules-content h3 {
+    color: #2E7D32;
+    margin: 15px 0 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 2px solid #4CAF50;
+    padding-bottom: 5px;
+}
+
+.rules-text p {
+    margin: 8px 0;
+    line-height: 1.6;
+    font-size: 14px;
+    color: #333;
+}
+
+.rules-text strong {
+    color: #1B5E20;
+    font-weight: bold;
+}
+
+/* 规则主要文字样式 - 吃掉将 */
+.rules-main-text {
+    display: flex;
+    flex-direction: column; /* 垂直排列，每个字一行 */
+    justify-content: center;
+    align-items: center;
+    gap: 55px; /* 字与字之间55px间距 */
+    margin: 20px 0;
+}
+
+.rules-main-text span {
+    font-size: 120px; /* 字体大小改为120px */
+    font-weight: bold;
+    color: #1B5E20;
+    text-align: center;
+    display: inline-block;
+}
+
+
+
+
 
 

@@ -20,6 +20,11 @@ const redStatus = document.getElementById('redStatus');
 const blackStatus = document.getElementById('blackStatus');
 const redStorage = document.getElementById('redStorage');
 const blackStorage = document.getElementById('blackStorage');
+const rulesBtnSetup = document.getElementById('rulesBtnSetup');
+const rulesBtnGame = document.getElementById('rulesBtnGame');
+const rulesPanel = document.getElementById('rulesPanel');
+const returnBtn = document.getElementById('returnBtn');
+
 
 // 游戏状态
 let gameMode = 'setup'; // 'setup' 或 'playing'
@@ -39,9 +44,15 @@ let roomId = null; // 房间ID
 let connectionStatus = 'disconnected'; // 连接状态
 let currentTurn = 'red'; // 当前回合：'red' 或 'black'
 let turnNumber = 1; // 回合数
+let lastMovePositions = null; // 联机模式下最后一次移动的起点和终点坐标 {from: [col, row], to: [col, row]}
 
 // 动态棋盘状态（初始为空）
 let boardState = {};
+
+// 规则面板状态
+let rulesVisible = false;
+
+
 
 // WebSocket连接管理
 function connectToServer(serverUrl = null) {
@@ -233,6 +244,11 @@ function syncGameState(newGameState) {
 function syncMove(move) {
     const { fromCol, fromRow, toCol, toRow } = move;
     movePiece(fromCol, fromRow, toCol, toRow);
+
+    // 确保同步移动时也显示移动历史
+    if (isOnlineMode && gameMode === 'playing') {
+        showMoveHistory(fromCol, fromRow, toCol, toRow);
+    }
 }
 
 // 更新存储区显示状态
@@ -1144,6 +1160,53 @@ function clearHighlights() {
     });
 }
 
+// 清除移动历史显示
+function clearMoveHistory() {
+    document.querySelectorAll('.position').forEach(pos => {
+        pos.classList.remove('move-from', 'move-to');
+        // 移除移动历史的角框元素
+        pos.querySelectorAll('.corner-frame, .corner-bottom').forEach(corner => {
+            corner.remove();
+        });
+    });
+}
+
+// 显示移动历史（联机模式下的起点和终点红色三角框）
+function showMoveHistory(fromCol, fromRow, toCol, toRow) {
+    // 只在联机模式下显示移动历史
+    if (!isOnlineMode || gameMode !== 'playing') {
+        return;
+    }
+
+    // 清除之前的移动历史显示
+    clearMoveHistory();
+
+    // 保存移动历史
+    lastMovePositions = {
+        from: [fromCol, fromRow],
+        to: [toCol, toRow]
+    };
+
+    // 转换逻辑坐标为显示坐标
+    const fromDisplayCoords = logicToDisplay(fromCol, fromRow);
+    const toDisplayCoords = logicToDisplay(toCol, toRow);
+
+    // 获取当前游戏棋盘
+    const currentGrid = gameGrid;
+
+    // 显示起点红色三角框
+    const fromPosition = currentGrid.querySelector(`[data-col="${fromDisplayCoords.col}"][data-row="${fromDisplayCoords.row}"]`);
+    if (fromPosition) {
+        addCornerFrames(fromPosition, 'move-from');
+    }
+
+    // 显示终点红色三角框
+    const toPosition = currentGrid.querySelector(`[data-col="${toDisplayCoords.col}"][data-row="${toDisplayCoords.row}"]`);
+    if (toPosition) {
+        addCornerFrames(toPosition, 'move-to');
+    }
+}
+
 // 添加四个角的三角框架（围绕棋子图片或空位）
 function addCornerFrames(position, type = 'selected') {
     // 添加两个元素，每个元素用::before和::after创建两个三角形
@@ -1195,6 +1258,10 @@ function restartGame() {
     clearHighlights();
     clearStorageSelection();
     clearAvailablePlacements();
+    clearMoveHistory();
+
+    // 重置移动历史
+    lastMovePositions = null;
 
     // 重新初始化棋子存储区
     initializePieceStorage();
@@ -1338,8 +1405,9 @@ function movePiece(fromCol, fromRow, toCol, toRow) {
     // 重新渲染棋盘
     renderBoard();
 
-    // 在联机模式下切换回合
+    // 在联机模式下显示移动历史
     if (isOnlineMode && gameMode === 'playing') {
+        showMoveHistory(fromCol, fromRow, toCol, toRow);
         switchTurn();
     }
 }
@@ -1860,6 +1928,12 @@ function createBoard(gridElement, isSetupMode = false) {
                         } else if (selectedPiece && isValidMove(selectedCol, selectedRow, clickedCol, clickedRow, selectedPiece)) {
                             // 有效移动
                             clearHighlights();
+
+                            // 在联机模式下，清除之前的移动历史显示
+                            if (isOnlineMode && gameMode === 'playing') {
+                                clearMoveHistory();
+                            }
+
                             movePiece(selectedCol, selectedRow, clickedCol, clickedRow);
 
                             // 如果是联机模式，发送移动信息
@@ -1949,6 +2023,10 @@ function startGame() {
     // 重置回合状态
     currentTurn = 'red';
     turnNumber = 1;
+
+    // 清除移动历史
+    clearMoveHistory();
+    lastMovePositions = null;
 
     // 隐藏初始化界面的身份显示
     updateSetupPlayerIdentity();
@@ -2190,6 +2268,43 @@ redCompleteBtn.addEventListener('click', redComplete);
 
 // 黑方完成初始化按钮事件
 blackCompleteBtn.addEventListener('click', blackComplete);
+
+// 规则按钮功能
+function toggleRules() {
+    rulesVisible = !rulesVisible;
+    if (rulesVisible) {
+        rulesPanel.style.display = 'block';
+    } else {
+        rulesPanel.style.display = 'none';
+    }
+}
+
+// 规则按钮事件
+rulesBtnSetup.addEventListener('click', toggleRules);
+rulesBtnGame.addEventListener('click', toggleRules);
+
+// 返回按钮事件
+returnBtn.addEventListener('click', () => {
+    // 隐藏规则面板（如果正在显示）
+    rulesPanel.style.display = 'none';
+    rulesVisible = false;
+
+    // 断开WebSocket连接（如果存在）
+    if (websocket) {
+        websocket.close();
+        websocket = null;
+    }
+
+    // 重置游戏状态
+    isOnlineMode = false;
+    playerSide = null;
+    connectionStatus = 'disconnected';
+
+    // 返回主菜单
+    showMainMenu();
+});
+
+
 
 // 主菜单功能
 function showMainMenu() {
